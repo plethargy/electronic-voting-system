@@ -61,6 +61,10 @@ DECLARE @totalVotes int;
 EXEC @totalVotes = dbo.getElectionVotes @ElectionID = 1;
 SELECT @totalVotes; 
 
+DECLARE @candList table;
+EXEC @candList = dbo.getElectionCandidateList @ElectionID = 1;
+SELECT @candList;
+
 CREATE FUNCTION getOnlineVoteCount
 (
 @CandidateID int, 
