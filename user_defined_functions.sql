@@ -10,7 +10,7 @@ BEGIN
 	DECLARE @ManualVoteCount int, @OnlineVoteCount int, @EVMVoteCount int
 
 	SELECT @ManualVoteCount = SUM(VoteCount) 
-	FROM vsdb.dbo.ElectionCandidateManualVote
+	FROM evsdb.dbo.ElectionCandidateManualVote
 	WHERE ElectionID = @ElectionID AND CandidateID = @CandidateID
 
 	SELECT @OnlineVoteCount = SUM(VoteCount) 
@@ -27,13 +27,19 @@ END
 
 GO
 
+DECLARE @totalVotes int;
+EXEC @totalVotes = dbo.getCandidateElectionVoteCount @CandidateID = 1, @ElectionID = 1;
+SELECT @totalVotes; 
+
+
+
 CREATE FUNCTION getElectionCandidateList
 (
 @ElectionID int
 )
 RETURNS TABLE
 AS
-	RETURN SELECT CandidateID FROM vsdb.dbo.ElectionCandidates WHERE ElectionID = @ElectionID
+	RETURN SELECT CandidateID FROM evsdb.dbo.ElectionCandidates WHERE ElectionID = @ElectionID
 GO
 
 CREATE FUNCTION getElectionVotes
@@ -45,11 +51,15 @@ AS
 BEGIN
 
 	DECLARE @VoteCount int
-	SELECT @VoteCount = SUM(vsdb.dbo.getCandidateElectionVoteCount(CandidateID, @ElectionID)) FROM getElectionCandidateList(@ElectionID)
+	SELECT @VoteCount = SUM(evsdb.dbo.getCandidateElectionVoteCount(CandidateID, @ElectionID)) FROM getElectionCandidateList(@ElectionID)
 	RETURN @VoteCount
 END
 
 GO
+
+DECLARE @totalVotes int;
+EXEC @totalVotes = dbo.getElectionVotes @ElectionID = 1;
+SELECT @totalVotes; 
 
 CREATE FUNCTION getOnlineVoteCount
 (
@@ -63,7 +73,7 @@ BEGIN
 	DECLARE @OnlineVoteCount int
 
 	SELECT @OnlineVoteCount = SUM(VoteCount) 
-	FROM vsdb.dbo.ElectionCandidateOnlineVote
+	FROM evsdb.dbo.ElectionCandidateOnlineVote
 	WHERE ElectionID = @ElectionID AND CandidateID = @CandidateID
 
 	RETURN @OnlineVoteCount
@@ -71,6 +81,9 @@ END
 
 GO
 
+DECLARE @totalVotes int;
+EXEC @totalVotes = dbo.getOnlineVoteCount @CandidateID = 1, @ElectionID = 1;
+SELECT @totalVotes; 
 
 CREATE FUNCTION getManualVoteCount
 (
@@ -84,13 +97,17 @@ BEGIN
 	DECLARE @ManualVoteCount int
 
 	SELECT @ManualVoteCount = SUM(VoteCount) 
-	FROM vsdb.dbo.ElectionCandidateManualVote
+	FROM evsdb.dbo.ElectionCandidateManualVote
 	WHERE ElectionID = @ElectionID AND CandidateID = @CandidateID
 
 	RETURN @ManualVoteCount
 END
 
 GO
+
+DECLARE @totalVotes int;
+EXEC @totalVotes = dbo.getManualVoteCount @CandidateID = 1, @ElectionID = 1;
+SELECT @totalVotes; 
 
 CREATE FUNCTION getEVMVoteCount
 (
@@ -104,7 +121,7 @@ BEGIN
 	DECLARE @EVMVoteCount int
 
 	SELECT @EVMVoteCount = SUM(VoteCount) 
-	FROM vsdb.dbo.ElectionCandidateEVMVote
+	FROM evsdb.dbo.ElectionCandidateEVMVote
 	WHERE ElectionID = @ElectionID AND CandidateID = @CandidateID
 
 	RETURN @EVMVoteCount
@@ -112,6 +129,9 @@ END
 
 GO
 
+DECLARE @totalVotes int;
+EXEC @totalVotes = dbo.getEVMVoteCount @CandidateID = 1, @ElectionID = 1;
+SELECT @totalVotes; 
 
 CREATE FUNCTION getEVMVoteCountByPolingStationAddress
 (
@@ -125,12 +145,12 @@ BEGIN
 	DECLARE @EVMVoteCount int
 
 	SELECT a.street, a.city, a.country, @EVMVoteCount = SUM(VoteCount) EVM_COUNT
-	FROM vsdb.dbo.ElectionCandidateEVMVote e
-	INNER JOIN vsdb.dbo.EVM evm
+	FROM evsdb.dbo.ElectionCandidateEVMVote e
+	INNER JOIN evsdb.dbo.EVM evm
 	ON e.EVM_ID = evm.EVM_ID
-	INNER JOIN vsdb.dbo.POLINGSTATION ps
+	INNER JOIN evsdb.dbo.POLINGSTATION ps
 	ON evm.PolilngStationID = ps.PolilngStationID
-	INNER JOIN vsdb.dbo.Address a
+	INNER JOIN evsdb.dbo.Address a
 	ON ps.AddressID = a.AddressID
 	WHERE e.ElectionID = @ElectionID AND e.CandidateID = @CandidateID
 	GROUP BY a.AddressID
