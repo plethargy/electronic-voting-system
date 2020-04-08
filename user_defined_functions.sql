@@ -54,5 +54,91 @@ END
 
 GO
 
+CREATE FUNCTION getOnlineVoteCount
+(
+@CandidateID int, 
+@ElectionID int
+)
+RETURNS INT 
+AS 
+BEGIN
+
+	DECLARE @OnlineVoteCount int
+
+	SELECT @OnlineVoteCount = SUM(VoteCount) 
+	FROM ElectionCandidateOnlineVote
+	WHERE ElectionID = @ElectionID AND CandidateID = @CandidateID
+
+	RETURN @OnlineVoteCount
+END
+
+GO
 
 
+CREATE FUNCTION getManualVoteCount
+(
+@CandidateID int, 
+@ElectionID int
+)
+RETURNS INT 
+AS 
+BEGIN
+
+	DECLARE @ManualVoteCount int
+
+	SELECT @ManualVoteCount = SUM(VoteCount) 
+	FROM ElectionCandidateManualVote
+	WHERE ElectionID = @ElectionID AND CandidateID = @CandidateID
+
+	RETURN @ManualVoteCount
+END
+
+GO
+
+CREATE FUNCTION getEVMVoteCount
+(
+@CandidateID int, 
+@ElectionID int
+)
+RETURNS INT 
+AS 
+BEGIN
+
+	DECLARE @EVMVoteCount int
+
+	SELECT @EVMVoteCount = SUM(VoteCount) 
+	FROM ElectionCandidateEVMVote
+	WHERE ElectionID = @ElectionID AND CandidateID = @CandidateID
+
+	RETURN @EVMVoteCount
+END
+
+GO
+
+
+CREATE FUNCTION getEVMVoteCountByPolingStationAddress
+(
+@CandidateID int, 
+@ElectionID int
+)
+RETURNS INT 
+AS 
+BEGIN
+
+	DECLARE @EVMVoteCount int
+
+	SELECT a.street, a.city, a.country, @EVMVoteCount = SUM(VoteCount) EVM_COUNT
+	FROM ElectionCandidateEVMVote e
+	INNER JOIN EVM evm
+	ON e.EVM_ID = evm.EVM_ID
+	INNER JOIN POLINGSTATION ps
+	ON evm.PolilngStationID = ps.PolilngStationID
+	INNER JOIN Address a
+	ON ps.AddressID = a.AddressID
+	WHERE e.ElectionID = @ElectionID AND e.CandidateID = @CandidateID
+	GROUP BY a.AddressID
+
+	RETURN @EVMVoteCount
+END
+
+GO
