@@ -1,0 +1,21 @@
+CREATE VIEW [CitizenInformation]
+AS
+SELECT [Citizen].[Surname]
+	  ,[Citizen].[Name]
+	  ,[Citizen].[CitizenID]
+      ,[Citizen].[IDNumber]
+	  ,[Address].[Country]
+	  ,[Address].[City]
+	  ,[Address].[Street]
+	  ,[Address].[PostalCode]
+	  ,[Contact].[Email]
+	  ,[Contact].[CellPhone]
+	  ,[Contact].[Telephone]
+	  ,[Contact].[Fax]
+  FROM [VSDB].[dbo].[Citizen]
+  LEFT JOIN [VSDB].[dbo].[Address] 
+  ON [Citizen].[AddressID] = [Address].[AddressID]
+  LEFT JOIN [VSDB].[dbo].[Contact]
+  ON [Citizen].[ContactID] = [Contact].[ContactID]
+  ORDER BY [Citizen].[Surname] ASC offset 0 ROWS
+  GO
